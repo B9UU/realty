@@ -2,11 +2,12 @@
 ## TODOS
 - [x] make API that returns hello world
 - [x] add server configuration
-- [ ] take configuration as flags
-- [ ] create and connect to database and tables using migrate
-- [ ] users, token and listing model
+- [x] take configuration as flags
+- [x] create and connect to database and tables using migrate
+- [ ] users, token and realty model
+- [x] endpoint to add listings
 - [ ] return a simple list of 20 listings
-- [ ] add costum errors
+- [x] add custom errors
 - [ ] create a make file
-- [ ] add json logging (should read more on let's go further)
+- [x] add json logging (should read more on let's go further)
 - [ ] add rate limiter

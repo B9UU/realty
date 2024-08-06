@@ -16,7 +16,9 @@ func (app *application) serve() error {
 		WriteTimeout: time.Second * 30,
 		// TODO: add error log handler
 	}
-	fmt.Printf("listening on port %d\n", app.config.port)
+	app.logger.PrintInfo("Lisetening on port: ", map[string]string{
+		"addr": ser.Addr,
+	})
 	if err := ser.ListenAndServe(); err != nil {
 		return err
 	}
