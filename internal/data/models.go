@@ -3,7 +3,7 @@ package data
 import "database/sql"
 
 type Models struct {
-	Realty RealtyModel
+	Realty RealtyInterface
 }
 
 func NewModels(db *sql.DB) Models {

@@ -19,6 +19,11 @@ type RealtyModel struct {
 	DB *sql.DB
 }
 
+type RealtyInterface interface {
+	Insert(realty *Realty) error
+	GetAll() ([]*Realty, error)
+}
+
 func (m RealtyModel) Insert(realty *Realty) error {
 	query := `
         INSERT INTO realty (listing_type, promo_type, url, project_name, display_address)
