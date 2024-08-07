@@ -14,5 +14,5 @@ func (app *application) routes() http.Handler {
 	}))
 	router.HandlerFunc(http.MethodPost, "/realty", app.addRealty)
 	router.HandlerFunc(http.MethodGet, "/realty", app.getRealties)
-	return router
+	return app.logRequest(router)
 }

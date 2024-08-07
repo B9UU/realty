@@ -12,7 +12,8 @@
 - [x] add json logging (should read more on let's go further)
 - [ ] add rate limiter
 
-- [ ] testing
+- [x] testing
+- [x] add middleware to log all requests
 - [ ] add rentals.ca schema to database
 - [ ] add new realty models
 - [ ] create cities table
@@ -23,3 +24,4 @@
 - [ ] add multiple filters
 - [ ] make getAll return limited data but uses filters
 - [ ] make get(id) to return all available data for a realty
+- [ ] validation

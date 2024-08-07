@@ -13,7 +13,7 @@ type realtyResp struct {
 	Realties []data.Realty `json:"realties"`
 }
 
-func TestRealty(t *testing.T) {
+func TestGetRealties(t *testing.T) {
 	app := newTestApp()
 	req, err := http.NewRequest(http.MethodGet, "/realty", nil)
 	if err != nil {
@@ -36,7 +36,8 @@ func TestRealty(t *testing.T) {
 			t.Errorf("want %d got %d: %+v", i+1, r.ID, r)
 		}
 		t.Logf("want %d got %d: %+v", i+1, r.ID, r)
-
 	}
+}
+func TestAddRealty(t *testing.T) {
 
 }

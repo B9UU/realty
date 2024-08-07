@@ -60,7 +60,6 @@ func main() {
 	if err := app.serve(); err != nil {
 		app.logger.PrintFatal(err, nil)
 	}
-
 }
 
 func openDB(conf config) (*sql.DB, error) {
@@ -82,5 +81,4 @@ func openDB(conf config) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
-
 }
