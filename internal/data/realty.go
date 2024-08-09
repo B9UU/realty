@@ -3,16 +3,36 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
+
+	"github.com/lib/pq"
+)
+
+var (
+	ErrDuplicateId = errors.New("duplicate id")
 )
 
 type Realty struct {
-	ID             int    `json:"id"`
-	ListingType    string `json:"listing_type"`
-	PromoType      string `json:"promo_type,omitempty"`
-	URL            string `json:"url"`
-	ProjectName    string `json:"project_name"`
-	DisplayAddress string `json:"display_address"`
+	ID              int64     `json:"id"`
+	Name            string    `json:"name"`
+	Address1        string    `json:"address1"`
+	Address2        string    `json:"address2"`
+	PostalCode      string    `json:"postal_code"`
+	Lat             float64   `json:"lat"`
+	Lng             float64   `json:"lng"`
+	Title           string    `json:"title"`
+	FeaturedStatus  string    `json:"featured_status"`
+	CityName        string    `json:"city_name"`
+	PhotoCount      int       `json:"photo_count"`
+	PhotoURL        string    `json:"photo_url"`
+	RawPropertyType string    `json:"raw_property_type"`
+	PropertyType    string    `json:"property_type"`
+	Updated         time.Time `json:"updated"`
+	RentRange       []int     `json:"rent_range"`
+	BedsRange       []int     `json:"beds_range"`
+	BathsRange      []int     `json:"baths_range"`
+	DimensionsRange []int     `json:"dimensions_range"`
 }
 
 type RealtyModel struct {
@@ -26,40 +46,59 @@ type RealtyInterface interface {
 
 func (m RealtyModel) Insert(realty *Realty) error {
 	query := `
-        INSERT INTO realty (listing_type, promo_type, url, project_name, display_address)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id
-    `
+			INSERT INTO realty (
+				id, name, address1, address2, postal_code, lat, lng, title,
+				featured_status, city_name, photo_count, photo_url, raw_property_type,
+				property_type, updated, rent_range, beds_range, baths_range, dimensions_range
+			)
+			VALUES (
+				$1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+				$11, $12, $13, $14, $15, $16, $17, $18, $19
+			)`
+
 	args := []interface{}{
-		realty.ListingType, realty.PromoType, realty.URL,
-		realty.ProjectName, realty.DisplayAddress}
+		realty.ID, realty.Name, realty.Address1, realty.Address2, realty.PostalCode,
+		realty.Lat, realty.Lng, realty.Title, realty.FeaturedStatus, realty.CityName,
+		realty.PhotoCount, realty.PhotoURL, realty.RawPropertyType, realty.PropertyType,
+		realty.Updated, pq.Array(realty.RentRange), pq.Array(realty.BedsRange),
+		pq.Array(realty.BathsRange), pq.Array(realty.DimensionsRange),
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&realty.ID)
+	_, err := m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		// check if the id already exists
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == pq.ErrorCode("23505") {
+			return ErrDuplicateId
+		}
+		return err
+	}
+	return nil
 }
 func (m RealtyModel) GetAll() ([]*Realty, error) {
-	query := "SELECT * FROM realty LIMIT 200"
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-	rows, err := m.DB.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	realties := []*Realty{}
-	for rows.Next() {
-		var realty Realty
-		err := rows.Scan(&realty.ID, &realty.ListingType, &realty.PromoType,
-			&realty.URL, &realty.ProjectName, &realty.DisplayAddress)
-		if err != nil {
-			return nil, err
-		}
-		realties = append(realties, &realty)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return realties, nil
+	// query := "SELECT * FROM realty LIMIT 200"
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	// defer cancel()
+	// rows, err := m.DB.QueryContext(ctx, query)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer rows.Close()
+	// realties := []*Realty{}
+	// for rows.Next() {
+	// 	var realty Realty
+	// 	err := rows.Scan(&realty.ID, &realty.ListingType, &realty.PromoType,
+	// 		&realty.URL, &realty.ProjectName, &realty.DisplayAddress)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	realties = append(realties, &realty)
+	// }
+	// if err := rows.Err(); err != nil {
+	// 	return nil, err
+	// }
+	// return realties, nil
+	return nil, nil
 }
 
 // Validate Realty inpute

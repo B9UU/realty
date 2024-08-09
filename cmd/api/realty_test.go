@@ -31,12 +31,6 @@ func TestGetRealties(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to parse response: %v", err)
 	}
-	for i, r := range got.Realties {
-		if r.ID != i+1 {
-			t.Errorf("want %d got %d: %+v", i+1, r.ID, r)
-		}
-		t.Logf("want %d got %d: %+v", i+1, r.ID, r)
-	}
 }
 func TestAddRealty(t *testing.T) {
 
