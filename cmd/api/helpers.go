@@ -9,8 +9,10 @@ import (
 	"strings"
 )
 
+// type to wrape the response
 type envelope map[string]interface{}
 
+// Reads from r into dest. only 1MB allowed
 func (app *application) ReadJSON(w http.ResponseWriter, r *http.Request, dest interface{}) error {
 	const max = 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(max))
@@ -63,7 +65,7 @@ func (app *application) ReadJSON(w http.ResponseWriter, r *http.Request, dest in
 	return nil
 }
 
-// Handle the json response
+// writes data to w with headers
 func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 	jsn, err := json.Marshal(data)
 	if err != nil {

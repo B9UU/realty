@@ -14,9 +14,10 @@
 
 - [x] testing
 - [x] add middleware to log all requests
-- [ ] add rentals.ca schema to database
-- [ ] add new realty models
-- [ ] create cities table
+- [x] add rentals.ca schema to database
+- [x] add new realty models
+<!-- - [ ] create cities table -->
+- [x] update getRealties to use new schema
 - [ ] endpoint for autocomplete cities
 - [ ] start taking queries (city) and only return results there
 - [ ] maybe figure out how to take lng-int and how to search database for that

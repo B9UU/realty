@@ -9,6 +9,7 @@ import (
 	"github.com/b9uu/realty/internal/validator"
 )
 
+// TODO: only admin can access this handler
 func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
 	var realty data.Realty
 	v := validator.New()
@@ -20,6 +21,7 @@ func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
 	// insert to db
 	err = app.models.Realty.Insert(&realty)
 	if err != nil {
+		// check if id is unique
 		if errors.Is(err, data.ErrDuplicateId) {
 			v.AddError("id", "a listing with this id already exists")
 			app.failedValidationRespone(w, r, v.Errors)

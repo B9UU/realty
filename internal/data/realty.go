@@ -14,25 +14,25 @@ var (
 )
 
 type Realty struct {
-	ID              int64     `json:"id"`
-	Name            string    `json:"name"`
-	Address1        string    `json:"address1"`
-	Address2        string    `json:"address2"`
-	PostalCode      string    `json:"postal_code"`
-	Lat             float64   `json:"lat"`
-	Lng             float64   `json:"lng"`
-	Title           string    `json:"title"`
-	FeaturedStatus  string    `json:"featured_status"`
-	CityName        string    `json:"city_name"`
-	PhotoCount      int       `json:"photo_count"`
-	PhotoURL        string    `json:"photo_url"`
-	RawPropertyType string    `json:"raw_property_type"`
-	PropertyType    string    `json:"property_type"`
-	Updated         time.Time `json:"updated"`
-	RentRange       []int     `json:"rent_range"`
-	BedsRange       []int     `json:"beds_range"`
-	BathsRange      []int     `json:"baths_range"`
-	DimensionsRange []int     `json:"dimensions_range"`
+	ID              int64           `json:"id"`
+	Name            string          `json:"name"`
+	Address1        string          `json:"address1"`
+	Address2        string          `json:"address2"`
+	PostalCode      string          `json:"postal_code"`
+	Lat             float64         `json:"lat"`
+	Lng             float64         `json:"lng"`
+	Title           string          `json:"title"`
+	FeaturedStatus  string          `json:"featured_status"`
+	CityName        string          `json:"city_name"`
+	PhotoCount      int             `json:"photo_count"`
+	PhotoURL        string          `json:"photo_url"`
+	RawPropertyType string          `json:"raw_property_type"`
+	PropertyType    string          `json:"property_type"`
+	Updated         time.Time       `json:"updated"`
+	RentRange       []sql.NullInt32 `json:"rent_range"`
+	BedsRange       []sql.NullInt32 `json:"beds_range"`
+	BathsRange      []sql.NullInt32 `json:"baths_range"`
+	DimensionsRange []sql.NullInt32 `json:"dimensions_range"`
 }
 
 type RealtyModel struct {
@@ -76,29 +76,33 @@ func (m RealtyModel) Insert(realty *Realty) error {
 	return nil
 }
 func (m RealtyModel) GetAll() ([]*Realty, error) {
-	// query := "SELECT * FROM realty LIMIT 200"
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	// defer cancel()
-	// rows, err := m.DB.QueryContext(ctx, query)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// defer rows.Close()
-	// realties := []*Realty{}
-	// for rows.Next() {
-	// 	var realty Realty
-	// 	err := rows.Scan(&realty.ID, &realty.ListingType, &realty.PromoType,
-	// 		&realty.URL, &realty.ProjectName, &realty.DisplayAddress)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	realties = append(realties, &realty)
-	// }
-	// if err := rows.Err(); err != nil {
-	// 	return nil, err
-	// }
-	// return realties, nil
-	return nil, nil
+	query := "SELECT * FROM realty LIMIT 200"
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	realties := []*Realty{}
+	for rows.Next() {
+		var realty Realty
+		err := rows.Scan(
+			&realty.ID, &realty.Name, &realty.Address1, &realty.Address2, &realty.PostalCode,
+			&realty.Lat, &realty.Lng, &realty.Title, &realty.FeaturedStatus, &realty.CityName,
+			&realty.PhotoCount, &realty.PhotoURL, &realty.RawPropertyType, &realty.PropertyType,
+			&realty.Updated, pq.Array(&realty.RentRange), pq.Array(&realty.BedsRange),
+			pq.Array(&realty.BathsRange), pq.Array(&realty.DimensionsRange),
+		)
+		if err != nil {
+			return nil, err
+		}
+		realties = append(realties, &realty)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return realties, nil
 }
 
 // Validate Realty inpute
