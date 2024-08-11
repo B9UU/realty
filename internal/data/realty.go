@@ -6,45 +6,27 @@ import (
 	"errors"
 	"time"
 
+	"github.com/b9uu/realty/internal/validator"
 	"github.com/lib/pq"
 )
 
 var (
 	ErrDuplicateId = errors.New("duplicate id")
+	ErrNotFound    = errors.New("record not found")
 )
-
-type Realty struct {
-	ID              int64           `json:"id"`
-	Name            string          `json:"name"`
-	Address1        string          `json:"address1"`
-	Address2        string          `json:"address2"`
-	PostalCode      string          `json:"postal_code"`
-	Lat             float64         `json:"lat"`
-	Lng             float64         `json:"lng"`
-	Title           string          `json:"title"`
-	FeaturedStatus  string          `json:"featured_status"`
-	CityName        string          `json:"city_name"`
-	PhotoCount      int             `json:"photo_count"`
-	PhotoURL        string          `json:"photo_url"`
-	RawPropertyType string          `json:"raw_property_type"`
-	PropertyType    string          `json:"property_type"`
-	Updated         time.Time       `json:"updated"`
-	RentRange       []sql.NullInt32 `json:"rent_range"`
-	BedsRange       []sql.NullInt32 `json:"beds_range"`
-	BathsRange      []sql.NullInt32 `json:"baths_range"`
-	DimensionsRange []sql.NullInt32 `json:"dimensions_range"`
-}
 
 type RealtyModel struct {
 	DB *sql.DB
 }
 
 type RealtyInterface interface {
-	Insert(realty *Realty) error
-	GetAll() ([]*Realty, error)
+	Insert(realty *RealtyInput) error
+	GetAll() ([]*RealtyResponse, error)
+	AutoComplete(string) ([]string, error)
 }
 
-func (m RealtyModel) Insert(realty *Realty) error {
+// inserts into db
+func (m RealtyModel) Insert(realty *RealtyInput) error {
 	query := `
 			INSERT INTO realty (
 				id, name, address1, address2, postal_code, lat, lng, title,
@@ -75,7 +57,9 @@ func (m RealtyModel) Insert(realty *Realty) error {
 	}
 	return nil
 }
-func (m RealtyModel) GetAll() ([]*Realty, error) {
+
+// gets all realties from db
+func (m RealtyModel) GetAll() ([]*RealtyResponse, error) {
 	query := "SELECT * FROM realty LIMIT 200"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -84,9 +68,9 @@ func (m RealtyModel) GetAll() ([]*Realty, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	realties := []*Realty{}
+	realties := []*RealtyResponse{}
 	for rows.Next() {
-		var realty Realty
+		var realty RealtyResponse
 		err := rows.Scan(
 			&realty.ID, &realty.Name, &realty.Address1, &realty.Address2, &realty.PostalCode,
 			&realty.Lat, &realty.Lng, &realty.Title, &realty.FeaturedStatus, &realty.CityName,
@@ -105,21 +89,35 @@ func (m RealtyModel) GetAll() ([]*Realty, error) {
 	return realties, nil
 }
 
-// Validate Realty inpute
+func (m RealtyModel) AutoComplete(i string) ([]string, error) {
+	query := `SELECT DISTINCT city_name FROM "realty" WHERE city_name ILIKE '%' || $1 || '%'`
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	rows, err := m.DB.QueryContext(ctx, query, i)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	results := []string{}
+	for rows.Next() {
+		var city string
+		err := rows.Scan(&city)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, city)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
 
-// func ValidateRealty(v *validator.Validator, realty *Realty) {
-// 	v.Check(realty.Title != "", "title", "Must be provided")
-// 	v.Check(len(realty.Title) <= 500, "title", "Must not be more than 500 bytes long")
-//
-// 	v.Check(movie.Year != 0, "year", "Must be provided")
-// 	v.Check(movie.Year >= 1888, "year", "Must be greater than 1888")
-// 	v.Check(movie.Year <= int32(time.Now().Year()), "year", "Must not be in the future")
-//
-// 	v.Check(movie.Runtime != 0, "runtime", "Must be provided")
-// 	v.Check(movie.Runtime > 0, "runtime", "Must be a positive integer")
-//
-// 	v.Check(movie.Genres != nil, "genres", "Must be provided")
-// 	v.Check(len(movie.Genres) >= 1, "genres", "Must contain at least 1")
-// 	v.Check(len(movie.Genres) <= 5, "genres", "Must not contain more than 5")
-// 	v.Check(validator.Unique(movie.Genres), "genres", "Must not contain duplicate values")
-// }
+// Validate AutoComplete city input
+func ValidateCity(v *validator.Validator, city string) {
+	v.Check(city != "", "city", "must be provided")
+	v.Check(len(city) <= 100, "city", "must not be more than 100 bytes long")
+	v.Check(len(city) >= 3, "city", "must not be less than 3 characters long")
+}

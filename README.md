@@ -18,7 +18,7 @@
 - [x] add new realty models
 <!-- - [ ] create cities table -->
 - [x] update getRealties to use new schema
-- [ ] endpoint for autocomplete cities
+- [x] endpoint for autocomplete cities
 - [ ] start taking queries (city) and only return results there
 - [ ] maybe figure out how to take lng-int and how to search database for that
 - [ ] figure out how to save images localy with custom url

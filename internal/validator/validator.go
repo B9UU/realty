@@ -38,3 +38,30 @@ func (v *Validator) Check(ok bool, key, message string) {
 		v.AddError(key, message)
 	}
 }
+
+// check if value in list
+func In(value string, list ...string) bool {
+	for _, l := range list {
+		if value == l {
+			return true
+		}
+	}
+	return false
+}
+
+// check if value matches the regex
+func Matches(value string, rx *regexp.Regexp) bool {
+	return rx.MatchString(value)
+}
+
+// check if the values are unique
+func Unique(values []string) bool {
+	unique := make(map[string]bool)
+	for _, v := range values {
+		if unique[v] {
+			return false
+		}
+		unique[v] = true
+	}
+	return true
+}

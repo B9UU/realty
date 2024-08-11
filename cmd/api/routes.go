@@ -14,5 +14,6 @@ func (app *application) routes() http.Handler {
 	}))
 	router.HandlerFunc(http.MethodPost, "/realty", app.addRealty)
 	router.HandlerFunc(http.MethodGet, "/realty", app.getRealties)
+	router.HandlerFunc(http.MethodGet, "/auto-complete", app.autoComplete)
 	return app.logRequest(router)
 }

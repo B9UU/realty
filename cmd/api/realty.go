@@ -11,7 +11,7 @@ import (
 
 // TODO: only admin can access this handler
 func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
-	var realty data.Realty
+	var realty data.RealtyInput
 	v := validator.New()
 	err := app.ReadJSON(w, r, &realty)
 	if err != nil {
@@ -50,5 +50,23 @@ func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+}
 
+func (app *application) autoComplete(w http.ResponseWriter, r *http.Request) {
+	city := r.URL.Query().Get("city")
+	v := validator.New()
+	if data.ValidateCity(v, city); !v.Valid() {
+		app.failedValidationRespone(w, r, v.Errors)
+		return
+	}
+	results, err := app.models.Realty.AutoComplete(city)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelope{"result": results}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 }
