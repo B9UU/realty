@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// type to wrape the response
+type Envelope map[string]interface{}
+
 // cintains all models the application needs
 type Models struct {
 	Realty RealtyInterface

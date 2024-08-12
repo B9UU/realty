@@ -7,10 +7,9 @@ import (
 	"io"
 	"net/http"
 	"strings"
-)
 
-// type to wrape the response
-type envelope map[string]interface{}
+	"github.com/b9uu/realty/internal/data"
+)
 
 // Reads from r into dest. only 1MB allowed
 func (app *application) ReadJSON(w http.ResponseWriter, r *http.Request, dest interface{}) error {
@@ -66,7 +65,7 @@ func (app *application) ReadJSON(w http.ResponseWriter, r *http.Request, dest in
 }
 
 // writes data to w with headers
-func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
+func (app *application) writeJSON(w http.ResponseWriter, status int, data data.Envelope, headers http.Header) error {
 	jsn, err := json.Marshal(data)
 	if err != nil {
 		return err

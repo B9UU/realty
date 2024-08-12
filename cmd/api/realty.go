@@ -32,7 +32,7 @@ func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
 	}
 	header := make(http.Header)
 	header.Set("Location", fmt.Sprintf("v1/realty/%d", realty.ID))
-	err = app.writeJSON(w, http.StatusCreated, envelope{"realty": realty}, header)
+	err = app.writeJSON(w, http.StatusCreated, data.Envelope{"realty": realty}, header)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -45,7 +45,7 @@ func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	err = app.writeJSON(w, http.StatusOK, envelope{"realties": realties}, nil)
+	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realties": realties}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -64,7 +64,7 @@ func (app *application) autoComplete(w http.ResponseWriter, r *http.Request) {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	err = app.writeJSON(w, http.StatusOK, envelope{"result": results}, nil)
+	err = app.writeJSON(w, http.StatusOK, data.Envelope{"result": results}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

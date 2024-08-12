@@ -19,6 +19,7 @@
 <!-- - [ ] create cities table -->
 - [x] update getRealties to use new schema
 - [x] endpoint for autocomplete cities
+- [ ] add new tests for all endpoints
 - [ ] start taking queries (city) and only return results there
 - [ ] maybe figure out how to take lng-int and how to search database for that
 - [ ] figure out how to save images localy with custom url

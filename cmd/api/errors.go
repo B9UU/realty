@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/b9uu/realty/internal/data"
 )
 
 // logs the error with r method and url
@@ -16,7 +18,7 @@ func (app *application) logError(r *http.Request, err error) {
 // writes message and status to w.
 func (app *application) errorResponse(w http.ResponseWriter, r *http.Request,
 	message interface{}, status int) {
-	err := app.writeJSON(w, status, envelope{"error": message}, nil)
+	err := app.writeJSON(w, status, data.Envelope{"error": message}, nil)
 	if err != nil {
 		app.logError(r, err)
 		w.WriteHeader(http.StatusInternalServerError)

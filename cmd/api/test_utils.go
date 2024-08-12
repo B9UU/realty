@@ -1,13 +1,25 @@
 package main
 
-// import (
-// 	"github.com/b9uu/realty/internal/data"
-// 	"github.com/b9uu/realty/internal/mocks"
-// )
-//
-// func newTestApp() *application {
-// 	return &application{
-// 		models: data.Models{Realty: mocks.RealtyModelM{}},
-// 	}
-//
-// }
+import (
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
+	"github.com/b9uu/realty/internal/data"
+	"github.com/b9uu/realty/internal/mocks"
+	"github.com/b9uu/realty/jsonlog"
+)
+
+func newTestApp(rmock []*data.RealtyResponse) *application {
+	return &application{
+		models: data.Models{Realty: mocks.RealtyModelM{MockRealtyData: rmock}},
+		logger: jsonlog.New(os.Stdout, jsonlog.LevelInfo),
+	}
+
+}
+func newTestServer(t *testing.T, h http.Handler) *httptest.Server {
+	ts := httptest.NewServer(h)
+	return ts
+
+}
