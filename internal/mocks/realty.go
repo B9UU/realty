@@ -11,6 +11,7 @@ import (
 // RealtyModel Mock that implements Realty Interface
 type RealtyModelM struct {
 	MockRealtyData []*data.RealtyResponse
+	MockCities     []string
 }
 
 func (m RealtyModelM) Insert(realty *data.RealtyInput) error {
@@ -25,18 +26,51 @@ func (m RealtyModelM) GetAll() ([]*data.RealtyResponse, error) {
 
 // mock for autocomplete method
 func (m RealtyModelM) AutoComplete(sub string) ([]string, error) {
-	cities := []string{
-		"Vancouver",
-		"Montreal",
-	}
 
 	var results []string
-	for _, s := range cities {
-		if strings.Contains(s, sub) {
-			results = append(results, s)
+	for _, s := range m.MockCities {
+		if len(results) <= 10 {
+			if strings.Contains(s, sub) {
+				results = append(results, s)
+			}
+		} else {
+			break
 		}
 	}
 	return results, nil
+}
+
+var MockCities = []string{
+	"Toronto",
+	"Montreal",
+	"Vancouver",
+	"Calgary",
+	"Edmonton",
+	"Ottawa",
+	"Winnipeg",
+	"Quebec City",
+	"Hamilton",
+	"Kitchener",
+	"London",
+	"Victoria",
+	"Halifax",
+	"Oshawa",
+	"Windsor",
+	"Saskatoon",
+	"St. Catharines",
+	"Regina",
+	"St. John's",
+	"Barrie",
+	"Kelowna",
+	"Abbotsford",
+	"Greater Sudbury",
+	"Kingston",
+	"Saguenay",
+	"Trois-Rivières",
+	"Guelph",
+	"Moncton",
+	"Brantford",
+	"Thunder Bay",
 }
 
 var MockRealties = []data.RealtyResponse{
@@ -56,10 +90,22 @@ var MockRealties = []data.RealtyResponse{
 		RawPropertyType: "Apartment",
 		PropertyType:    "Residential",
 		Updated:         time.Now(),
-		RentRange:       []sql.NullInt32{sql.NullInt32{Int32: 1500, Valid: true}},
-		BedsRange:       []sql.NullInt32{sql.NullInt32{Int32: 2, Valid: true}},
-		BathsRange:      []sql.NullInt32{sql.NullInt32{Int32: 1, Valid: true}},
-		DimensionsRange: []sql.NullInt32{sql.NullInt32{Int32: 850, Valid: true}},
+		RentRange: []sql.NullInt32{
+			{Int32: 1500, Valid: true},
+			{Int32: 1800, Valid: true},
+		},
+		BedsRange: []sql.NullInt32{
+			{Int32: 2, Valid: true},
+			{Int32: 3, Valid: true},
+		},
+		BathsRange: []sql.NullInt32{
+			{Int32: 1, Valid: true},
+			{Int32: 2, Valid: true},
+		},
+		DimensionsRange: []sql.NullInt32{
+			{Int32: 850, Valid: true},
+			{Int32: 1050, Valid: true},
+		},
 	},
 	{
 		ID:              2,
@@ -77,10 +123,22 @@ var MockRealties = []data.RealtyResponse{
 		RawPropertyType: "Cottage",
 		PropertyType:    "Residential",
 		Updated:         time.Now(),
-		RentRange:       []sql.NullInt32{sql.NullInt32{Int32: 1200, Valid: true}},
-		BedsRange:       []sql.NullInt32{sql.NullInt32{Int32: 3, Valid: true}},
-		BathsRange:      []sql.NullInt32{sql.NullInt32{Int32: 2, Valid: true}},
-		DimensionsRange: []sql.NullInt32{sql.NullInt32{Int32: 1000, Valid: true}},
+		RentRange: []sql.NullInt32{
+			{Int32: 1200, Valid: true},
+			{Int32: 1500, Valid: true},
+		},
+		BedsRange: []sql.NullInt32{
+			{Int32: 3, Valid: true},
+			{Int32: 5, Valid: true},
+		},
+		BathsRange: []sql.NullInt32{
+			{Int32: 2, Valid: true},
+			{Int32: 3, Valid: true},
+		},
+		DimensionsRange: []sql.NullInt32{
+			{Int32: 1000, Valid: true},
+			{Int32: 1200, Valid: true},
+		},
 	},
 	// Add more mock entries as needed
 }

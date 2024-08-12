@@ -11,10 +11,24 @@ import (
 	"github.com/b9uu/realty/jsonlog"
 )
 
+func toPointer(drr []data.RealtyResponse) []*data.RealtyResponse {
+
+	list := []*data.RealtyResponse{}
+	for _, rr := range drr {
+		list = append(list, &rr)
+	}
+	return list
+}
+
 // returns new test application
-func newTestApp(rmock []*data.RealtyResponse) *application {
+func newTestApp() *application {
 	return &application{
-		models: data.Models{Realty: mocks.RealtyModelM{MockRealtyData: rmock}},
+		models: data.Models{
+			Realty: mocks.RealtyModelM{
+				MockCities:     mocks.MockCities,
+				MockRealtyData: toPointer(mocks.MockRealties),
+			},
+		},
 		logger: jsonlog.New(os.Stdout, jsonlog.LevelInfo),
 	}
 }
@@ -23,5 +37,4 @@ func newTestApp(rmock []*data.RealtyResponse) *application {
 func newTestServer(t *testing.T, h http.Handler) *httptest.Server {
 	ts := httptest.NewServer(h)
 	return ts
-
 }
