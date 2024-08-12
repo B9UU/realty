@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -21,37 +20,52 @@ func TestGetRealties(t *testing.T) {
 		{
 			name:       "with bad method",
 			method:     http.MethodPut,
-			realtyData: []*data.RealtyResponse{&mocks.MockRealties[0]},
+			realtyData: nil,
 			statusCode: http.StatusMethodNotAllowed,
+		},
+		{
+			name:       "Valid method",
+			method:     http.MethodGet,
+			realtyData: []*data.RealtyResponse{&mocks.MockRealties[0], &mocks.MockRealties[1]},
+			statusCode: http.StatusOK,
 		},
 	}
 	for _, test := range tests {
 
-		app := newTestApp(test.realtyData)
-		ts := newTestServer(t, app.routes())
-		defer ts.Close()
-		req := httptest.NewRequest(test.method, ts.URL+"/realty", nil)
-		fmt.Println(req.RequestURI)
-		req.RequestURI = ""
-		resp, err := ts.Client().Do(req)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer resp.Body.Close()
+		t.Run(test.name, func(t *testing.T) {
 
-		if status := resp.StatusCode; status != test.statusCode {
-			t.Errorf("Hanlder got wrong http status want %d got %d", test.statusCode, status)
-		}
-		var gotBody map[string][]data.RealtyResponse
-		if err := json.NewDecoder(resp.Body).Decode(&gotBody); err != nil {
-			t.Fatal(err)
-		}
-		for _, i := range gotBody["realties"] {
-			ddd := test.realtyData[0].ID
-			if ddd != i.ID {
-				t.Fatalf("not equal, want %v got %v", ddd, i.ID)
+			app := newTestApp(test.realtyData)
+			ts := newTestServer(t, app.routes())
+			defer ts.Close()
+			// initiate new http request
+			req := httptest.NewRequest(test.method, ts.URL+"/realty", nil)
+			// httptest.NewRequest setup RequestURI since it's meant for a server to send the request not a client
+			req.RequestURI = ""
+			// call the server client to do the request
+			resp, err := ts.Client().Do(req)
+			if err != nil {
+				t.Fatal(err)
 			}
-		}
+			defer resp.Body.Close()
+
+			// check for status code
+			if status := resp.StatusCode; status != test.statusCode {
+				t.Errorf("Hanlder got wrong http status want %d got %d", test.statusCode, status)
+			}
+			// FIX: not doing anything useful
+			if len(test.realtyData) > 0 {
+				var gotBody map[string][]data.RealtyResponse
+				if err := json.NewDecoder(resp.Body).Decode(&gotBody); err != nil {
+					t.Fatal(err)
+				}
+				for i, v := range gotBody["realties"] {
+					ddd := test.realtyData[i].ID
+					if ddd != v.ID {
+						t.Fatalf("not equal, want %v got %v", ddd, v.ID)
+					}
+				}
+			}
+		})
 	}
 }
 func TestAddRealty(t *testing.T) {

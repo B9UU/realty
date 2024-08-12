@@ -37,6 +37,10 @@ type Logger struct {
 	mu       sync.Mutex
 }
 
+type dd interface {
+	PrintLn(v ...interface{})
+}
+
 func New(out io.Writer, minLevel Level) *Logger {
 	return &Logger{
 		out:      out,
