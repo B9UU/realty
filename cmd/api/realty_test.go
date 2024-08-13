@@ -114,7 +114,7 @@ func TestAutoComplete(t *testing.T) {
 		req := httptest.NewRequest(test.method, ts.URL+"/auto-complete", nil)
 		// add query
 		q := req.URL.Query()
-		q.Add("city", test.input)
+		q.Add("q", test.input)
 
 		req.URL.RawQuery = q.Encode()
 		// httptest.NewRequest setup RequestURI since it's meant for a server to send the request not a client

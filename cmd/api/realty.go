@@ -40,10 +40,25 @@ func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
-	realties, err := app.models.Realty.GetAll()
+	city := r.URL.Query().Get("city")
+	if city != "" {
+		v := validator.New()
+		if data.ValidateCity(v, city); !v.Valid() {
+			app.failedValidationRespone(w, r, v.Errors)
+			return
+		}
+	}
+	app.logger.PrintInfo(city, nil)
+	realties, err := app.models.Realty.GetAll(city)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
+		switch {
+		case errors.Is(err, data.ErrNotFound):
+			app.notFoundErrorResponse(w, r)
+			return
+		default:
+			app.serverErrorResponse(w, r, err)
+			return
+		}
 	}
 	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realties": realties}, nil)
 	if err != nil {
@@ -53,16 +68,22 @@ func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) autoComplete(w http.ResponseWriter, r *http.Request) {
-	city := r.URL.Query().Get("city")
+	q := r.URL.Query().Get("q")
 	v := validator.New()
-	if data.ValidateCity(v, city); !v.Valid() {
+	if data.ValidateQuery(v, q); !v.Valid() {
 		app.failedValidationRespone(w, r, v.Errors)
 		return
 	}
-	results, err := app.models.Realty.AutoComplete(city)
+	results, err := app.models.Realty.AutoComplete(q)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
+		switch {
+		case errors.Is(err, data.ErrNotFound):
+			app.notFoundErrorResponse(w, r)
+			return
+		default:
+			app.serverErrorResponse(w, r, err)
+			return
+		}
 	}
 	err = app.writeJSON(w, http.StatusOK, data.Envelope{"result": results}, nil)
 	if err != nil {

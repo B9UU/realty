@@ -21,8 +21,8 @@ type RealtyModel struct {
 
 type RealtyInterface interface {
 	Insert(realty *RealtyInput) error
-	GetAll() ([]*RealtyResponse, error)
-	AutoComplete(string) ([]string, error)
+	GetAll(city string) ([]*RealtyResponse, error)
+	AutoComplete(q string) ([]string, error)
 }
 
 // inserts into db
@@ -59,17 +59,21 @@ func (m RealtyModel) Insert(realty *RealtyInput) error {
 }
 
 // gets all realties from db
-func (m RealtyModel) GetAll() ([]*RealtyResponse, error) {
-	query := "SELECT * FROM realty LIMIT 200"
+func (m RealtyModel) GetAll(city string) ([]*RealtyResponse, error) {
+	query := "SELECT * FROM realty WHERE LOWER(city_name) = LOWER($1) OR $1 = ''"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	rows, err := m.DB.QueryContext(ctx, query)
+	// args := []interface{}{city}
+	rows, err := m.DB.QueryContext(ctx, query, city)
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 	realties := []*RealtyResponse{}
+	var hasRows bool
 	for rows.Next() {
+		hasRows = true
 		var realty RealtyResponse
 		err := rows.Scan(
 			&realty.ID, &realty.Name, &realty.Address1, &realty.Address2, &realty.PostalCode,
@@ -86,22 +90,24 @@ func (m RealtyModel) GetAll() ([]*RealtyResponse, error) {
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+	if !hasRows {
+		return nil, ErrNotFound
+	}
 	return realties, nil
 }
 
-func (m RealtyModel) AutoComplete(i string) ([]string, error) {
+func (m RealtyModel) AutoComplete(q string) ([]string, error) {
 	query := `SELECT DISTINCT city_name FROM "realty" WHERE city_name ILIKE '%' || $1 || '%'`
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	rows, err := m.DB.QueryContext(ctx, query, i)
+	rows, err := m.DB.QueryContext(ctx, query, q)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNotFound
-		}
 		return nil, err
 	}
+	var hasRows bool
 	results := []string{}
 	for rows.Next() {
+		hasRows = true
 		var city string
 		err := rows.Scan(&city)
 		if err != nil {
@@ -112,12 +118,19 @@ func (m RealtyModel) AutoComplete(i string) ([]string, error) {
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+	if !hasRows {
+		return nil, ErrNotFound
+	}
 	return results, nil
 }
 
 // Validate AutoComplete city input
+func ValidateQuery(v *validator.Validator, q string) {
+	v.Check(q != "", "q", "must be provided")
+	v.Check(len(q) <= 100, "q", "must not be more than 100 bytes long")
+	v.Check(len(q) >= 3, "q", "must not be less than 3 characters long")
+}
 func ValidateCity(v *validator.Validator, city string) {
-	v.Check(city != "", "city", "must be provided")
 	v.Check(len(city) <= 100, "city", "must not be more than 100 bytes long")
 	v.Check(len(city) >= 3, "city", "must not be less than 3 characters long")
 }
