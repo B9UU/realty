@@ -20,7 +20,9 @@
 - [x] update getRealties to use new schema
 - [x] endpoint for autocomplete cities
 - [x] add new tests for all endpoints
-- [ ] start taking queries (city) and only return results there
+- [x] start taking queries (city) and only return results there
+- [x] make getRealties onlly return limited data
+- [ ] add filters and metadata
 - [ ] maybe figure out how to take lng-int and how to search database for that
 - [ ] figure out how to save images localy with custom url
 - [ ] add multiple filters

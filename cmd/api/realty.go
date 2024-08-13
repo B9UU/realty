@@ -48,7 +48,6 @@ func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	app.logger.PrintInfo(city, nil)
 	realties, err := app.models.Realty.GetAll(city)
 	if err != nil {
 		switch {

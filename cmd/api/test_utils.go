@@ -11,9 +11,9 @@ import (
 	"github.com/b9uu/realty/jsonlog"
 )
 
-func toPointer(drr []data.RealtyResponse) []*data.RealtyResponse {
+func toPointer(drr []data.Realties) []*data.Realties {
 
-	list := []*data.RealtyResponse{}
+	list := []*data.Realties{}
 	for _, rr := range drr {
 		list = append(list, &rr)
 	}

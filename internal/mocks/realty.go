@@ -10,7 +10,7 @@ import (
 
 // RealtyModel Mock that implements Realty Interface
 type RealtyModelM struct {
-	MockRealtyData []*data.RealtyResponse
+	MockRealtyData []*data.Realties
 	MockCities     []string
 }
 
@@ -19,7 +19,7 @@ func (m RealtyModelM) Insert(realty *data.RealtyInput) error {
 	return nil
 }
 
-func (m RealtyModelM) GetAll(city string) ([]*data.RealtyResponse, error) {
+func (m RealtyModelM) GetAll(city string) ([]*data.Realties, error) {
 	return m.MockRealtyData, nil
 
 }
@@ -73,7 +73,29 @@ var MockCities = []string{
 	"Thunder Bay",
 }
 
-var MockRealties = []data.RealtyResponse{
+var MockRealties = []data.Realties{
+	{
+		ID:           1,
+		Name:         "Modern Apartment",
+		Address1:     "123 Main St",
+		Address2:     "Apt 4B",
+		PostalCode:   "12345",
+		CityName:     "San Francisco",
+		PropertyType: "Residential",
+		Updated:      time.Now(),
+	},
+	{
+		ID:           2,
+		Name:         "Cozy Cottage",
+		Address1:     "456 Elm St",
+		Address2:     "",
+		PostalCode:   "67890",
+		CityName:     "New York",
+		PropertyType: "Residential",
+		Updated:      time.Now(),
+	},
+}
+var MockRealtiesResponse = []data.RealtyResponse{
 	{
 		ID:              1,
 		Name:            "Modern Apartment",
@@ -140,5 +162,4 @@ var MockRealties = []data.RealtyResponse{
 			{Int32: 1200, Valid: true},
 		},
 	},
-	// Add more mock entries as needed
 }

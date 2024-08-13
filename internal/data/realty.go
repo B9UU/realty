@@ -21,7 +21,7 @@ type RealtyModel struct {
 
 type RealtyInterface interface {
 	Insert(realty *RealtyInput) error
-	GetAll(city string) ([]*RealtyResponse, error)
+	GetAll(city string) ([]*Realties, error)
 	AutoComplete(q string) ([]string, error)
 }
 
@@ -59,8 +59,13 @@ func (m RealtyModel) Insert(realty *RealtyInput) error {
 }
 
 // gets all realties from db
-func (m RealtyModel) GetAll(city string) ([]*RealtyResponse, error) {
-	query := "SELECT * FROM realty WHERE LOWER(city_name) = LOWER($1) OR $1 = ''"
+func (m RealtyModel) GetAll(city string) ([]*Realties, error) {
+
+	// select id, updated from "realty" WHERE city_name = 'Vancouver' or '' = '' ORDER BY updated DESC, id ASC;
+	query := `
+			SELECT id, name, address1, address2, postal_code,
+			title,  city_name, photo_count, property_type, updated
+			FROM realty WHERE LOWER(city_name) = LOWER($1) OR $1 = ''`
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	// args := []interface{}{city}
@@ -70,17 +75,14 @@ func (m RealtyModel) GetAll(city string) ([]*RealtyResponse, error) {
 	}
 
 	defer rows.Close()
-	realties := []*RealtyResponse{}
+	realties := []*Realties{}
 	var hasRows bool
 	for rows.Next() {
 		hasRows = true
-		var realty RealtyResponse
+		var realty Realties
 		err := rows.Scan(
 			&realty.ID, &realty.Name, &realty.Address1, &realty.Address2, &realty.PostalCode,
-			&realty.Lat, &realty.Lng, &realty.Title, &realty.FeaturedStatus, &realty.CityName,
-			&realty.PhotoCount, &realty.PhotoURL, &realty.RawPropertyType, &realty.PropertyType,
-			&realty.Updated, pq.Array(&realty.RentRange), pq.Array(&realty.BedsRange),
-			pq.Array(&realty.BathsRange), pq.Array(&realty.DimensionsRange),
+			&realty.CityName, &realty.PropertyType, &realty.Updated,
 		)
 		if err != nil {
 			return nil, err

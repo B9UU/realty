@@ -16,7 +16,7 @@ func TestGetRealties(t *testing.T) {
 	tests := []struct {
 		name       string
 		method     string
-		realtyData []*data.RealtyResponse
+		realtyData []*data.Realties
 		statusCode int
 	}{
 		{
@@ -28,7 +28,7 @@ func TestGetRealties(t *testing.T) {
 		{
 			name:       "Valid method",
 			method:     http.MethodGet,
-			realtyData: []*data.RealtyResponse{&mocks.MockRealties[0], &mocks.MockRealties[1]},
+			realtyData: []*data.Realties{&mocks.MockRealties[0], &mocks.MockRealties[1]},
 			statusCode: http.StatusOK,
 		},
 	}
