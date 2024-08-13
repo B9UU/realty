@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/b9uu/realty/internal/validator"
@@ -21,7 +22,7 @@ type RealtyModel struct {
 
 type RealtyInterface interface {
 	Insert(realty *RealtyInput) error
-	GetAll(city string) ([]*Realties, error)
+	GetAll(city string, filters Filters) ([]*Realties, error)
 	AutoComplete(q string) ([]string, error)
 }
 
@@ -59,17 +60,22 @@ func (m RealtyModel) Insert(realty *RealtyInput) error {
 }
 
 // gets all realties from db
-func (m RealtyModel) GetAll(city string) ([]*Realties, error) {
+func (m RealtyModel) GetAll(city string, filters Filters) ([]*Realties, error) {
 
 	// select id, updated from "realty" WHERE city_name = 'Vancouver' or '' = '' ORDER BY updated DESC, id ASC;
-	query := `
+	query := fmt.Sprintf(`
 			SELECT id, name, address1, address2, postal_code,
-			title,  city_name, photo_count, property_type, updated
-			FROM realty WHERE LOWER(city_name) = LOWER($1) OR $1 = ''`
+			city_name, property_type, updated
+			FROM realty WHERE LOWER(city_name) = LOWER($1) OR $1 = ''
+			ORDER BY %s %s, id ASC
+			LIMIT $2 OFFSET $3`,
+		filters.sortColumn(), filters.sortDirection(),
+	)
+	args := []interface{}{city, filters.PageSize, filters.offset()}
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	// args := []interface{}{city}
-	rows, err := m.DB.QueryContext(ctx, query, city)
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

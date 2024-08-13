@@ -40,15 +40,27 @@ func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
-	city := r.URL.Query().Get("city")
-	if city != "" {
-		v := validator.New()
-		if data.ValidateCity(v, city); !v.Valid() {
-			app.failedValidationRespone(w, r, v.Errors)
-			return
-		}
+
+	var realty struct {
+		City string
+		data.Filters
 	}
-	realties, err := app.models.Realty.GetAll(city)
+	v := validator.New()
+	qs := r.URL.Query()
+	realty.City = app.readString(qs, "city", "")
+	realty.Filters.Page = app.readInt(qs, "page", 1, v)
+	realty.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	realty.Filters.Sort = app.readString(qs, "sort", "id")
+	realty.Filters.SortSafeList = []string{
+		"id", "updated",
+		"-id", "-updated",
+	}
+	if data.ValidateFilters(v, realty.Filters); !v.Valid() {
+		app.failedValidationRespone(w, r, v.Errors)
+		return
+
+	}
+	realties, err := app.models.Realty.GetAll(realty.City, realty.Filters)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrNotFound):

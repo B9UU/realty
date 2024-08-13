@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/b9uu/realty/internal/data"
+	"github.com/b9uu/realty/internal/validator"
 )
 
 // Reads from r into dest. only 1MB allowed
@@ -78,4 +81,29 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data data.E
 	w.WriteHeader(status)
 	w.Write(jsn)
 	return nil
+}
+
+// gets key from qs
+func (app *application) readString(qs url.Values, key, defaultValue string) string {
+	s := qs.Get(key)
+	if s == "" {
+		return defaultValue
+	}
+	return s
+}
+
+// gets key from qs
+func (app *application) readInt(
+	qs url.Values, key string,
+	defaultValue int, v *validator.Validator) int {
+	s := qs.Get(key)
+	if s == "" {
+		return defaultValue
+	}
+	q, err := strconv.Atoi(s)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+	return q
 }

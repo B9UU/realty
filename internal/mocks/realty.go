@@ -19,7 +19,7 @@ func (m RealtyModelM) Insert(realty *data.RealtyInput) error {
 	return nil
 }
 
-func (m RealtyModelM) GetAll(city string) ([]*data.Realties, error) {
+func (m RealtyModelM) GetAll(city string, filters data.Filters) ([]*data.Realties, error) {
 	return m.MockRealtyData, nil
 
 }
