@@ -60,7 +60,7 @@ func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	realties, err := app.models.Realty.GetAll(realty.City, realty.Filters)
+	realties, metadata, err := app.models.Realty.GetAll(realty.City, realty.Filters)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrNotFound):
@@ -71,7 +71,7 @@ func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realties": realties}, nil)
+	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realties": realties, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

@@ -22,7 +22,7 @@ type RealtyModel struct {
 
 type RealtyInterface interface {
 	Insert(realty *RealtyInput) error
-	GetAll(city string, filters Filters) ([]*Realties, error)
+	GetAll(city string, filters Filters) ([]*Realties, Metadata, error)
 	AutoComplete(q string) ([]string, error)
 }
 
@@ -60,11 +60,11 @@ func (m RealtyModel) Insert(realty *RealtyInput) error {
 }
 
 // gets all realties from db
-func (m RealtyModel) GetAll(city string, filters Filters) ([]*Realties, error) {
+func (m RealtyModel) GetAll(city string, filters Filters) ([]*Realties, Metadata, error) {
 
 	// select id, updated from "realty" WHERE city_name = 'Vancouver' or '' = '' ORDER BY updated DESC, id ASC;
 	query := fmt.Sprintf(`
-			SELECT id, name, address1, address2, postal_code,
+			SELECT COUNT(*) OVER(), id, name, address1, address2, postal_code,
 			city_name, property_type, updated
 			FROM realty WHERE LOWER(city_name) = LOWER($1) OR $1 = ''
 			ORDER BY %s %s, id ASC
@@ -77,31 +77,36 @@ func (m RealtyModel) GetAll(city string, filters Filters) ([]*Realties, error) {
 	defer cancel()
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
 	defer rows.Close()
-	realties := []*Realties{}
+
+	var realties = []*Realties{}
+	var totalRecords = 0
 	var hasRows bool
+
 	for rows.Next() {
 		hasRows = true
 		var realty Realties
 		err := rows.Scan(
+			&totalRecords,
 			&realty.ID, &realty.Name, &realty.Address1, &realty.Address2, &realty.PostalCode,
 			&realty.CityName, &realty.PropertyType, &realty.Updated,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		realties = append(realties, &realty)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	if !hasRows {
-		return nil, ErrNotFound
+		return nil, Metadata{}, ErrNotFound
 	}
-	return realties, nil
+	metaData := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	return realties, metaData, nil
 }
 
 func (m RealtyModel) AutoComplete(q string) ([]string, error) {

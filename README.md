@@ -22,7 +22,9 @@
 - [x] add new tests for all endpoints
 - [x] start taking queries (city) and only return results there
 - [x] make getRealties onlly return limited data
-- [ ] add filters and metadata
+- [x] add filters
+- [x] returning metadata to getRealties handler
+- [ ] metadata for autoComplete handler
 - [ ] maybe figure out how to take lng-int and how to search database for that
 - [ ] figure out how to save images localy with custom url
 - [ ] add multiple filters
