@@ -12,6 +12,7 @@ import (
 
 	"github.com/b9uu/realty/internal/data"
 	"github.com/b9uu/realty/internal/validator"
+	"github.com/julienschmidt/httprouter"
 )
 
 // Reads from r into dest. only 1MB allowed
@@ -106,4 +107,19 @@ func (app *application) readInt(
 		return defaultValue
 	}
 	return q
+}
+
+// gets the if from the r url param
+func (app *application) readIDParam(r *http.Request) (int64, error) {
+
+	parameters := httprouter.ParamsFromContext(r.Context()).ByName("id")
+	id, err := strconv.ParseInt(parameters, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	if id < 1 {
+
+		return 0, errors.New("invalid id parameter")
+	}
+	return id, nil
 }

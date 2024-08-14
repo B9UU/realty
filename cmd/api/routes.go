@@ -13,7 +13,8 @@ func (app *application) routes() http.Handler {
 		w.Write([]byte("hello world"))
 	}))
 	router.HandlerFunc(http.MethodPost, "/realty", app.addRealty)
-	router.HandlerFunc(http.MethodGet, "/realty", app.getRealties)
+	router.HandlerFunc(http.MethodGet, "/realty/:id", app.Realty)
+	router.HandlerFunc(http.MethodGet, "/realties", app.Realties)
 	router.HandlerFunc(http.MethodGet, "/auto-complete", app.autoComplete)
 	return app.logRequest(router)
 }

@@ -11,7 +11,7 @@ import (
 
 // TODO: only admin can access this handler
 func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
-	var realty data.RealtyInput
+	var realty data.Realty
 	v := validator.New()
 	err := app.ReadJSON(w, r, &realty)
 	if err != nil {
@@ -39,7 +39,7 @@ func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
+func (app *application) Realties(w http.ResponseWriter, r *http.Request) {
 
 	var realty struct {
 		City string
@@ -72,6 +72,31 @@ func (app *application) getRealties(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realties": realties, "metadata": metadata}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}
+
+func (app *application) Realty(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundErrorResponse(w, r)
+		return
+	}
+	fmt.Println(id)
+	realty, err := app.models.Realty.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrNotFound):
+			app.notFoundErrorResponse(w, r)
+			return
+		default:
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	}
+	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realty": realty}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
