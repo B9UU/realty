@@ -21,13 +21,14 @@ type RealtyModel struct {
 }
 
 type RealtyInterface interface {
-	Insert(realty *RealtyInput) error
+	Insert(realty *Realty) error
 	GetAll(city string, filters Filters) ([]*Realties, Metadata, error)
 	AutoComplete(q string) ([]string, error)
+	Get(id int64) (*Realty, error)
 }
 
 // inserts into db
-func (m RealtyModel) Insert(realty *RealtyInput) error {
+func (m RealtyModel) Insert(realty *Realty) error {
 	query := `
 			INSERT INTO realty (
 				id, name, address1, address2, postal_code, lat, lng, title,
@@ -109,16 +110,44 @@ func (m RealtyModel) GetAll(city string, filters Filters) ([]*Realties, Metadata
 	return realties, metaData, nil
 }
 
+func (m RealtyModel) Get(id int64) (*Realty, error) {
+	query := `
+		SELECT
+		id, name, address1, address2, postal_code,
+		lat, lng, title, featured_status, city_name,
+		photo_count, photo_url, raw_property_type, property_type,
+		updated, rent_range, beds_range, baths_range, dimensions_range
+		FROM "realty" WHERE id = $1`
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	var realty Realty
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&realty.ID, &realty.Name, &realty.Address1, &realty.Address2,
+		&realty.PostalCode, &realty.Lat, &realty.Lng, &realty.Title,
+		&realty.FeaturedStatus, &realty.CityName, &realty.PhotoCount,
+		&realty.PhotoURL, &realty.RawPropertyType, &realty.PropertyType,
+		&realty.Updated, pq.Array(&realty.RentRange), pq.Array(&realty.BedsRange),
+		pq.Array(&realty.BathsRange), pq.Array(&realty.DimensionsRange),
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return &realty, nil
+}
 func (m RealtyModel) AutoComplete(q string) ([]string, error) {
 	query := `SELECT DISTINCT city_name FROM "realty" WHERE city_name ILIKE '%' || $1 || '%'`
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	rows, err := m.DB.QueryContext(ctx, query, q)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	var hasRows bool
-	results := []string{}
+	var results = []string{}
 	for rows.Next() {
 		hasRows = true
 		var city string

@@ -24,7 +24,8 @@
 - [x] make getRealties onlly return limited data
 - [x] add filters
 - [x] returning metadata to getRealties handler
-- [ ] metadata for autoComplete handler
+- [-] metadata for autoComplete handler
+- [ ] create an endpoint to return all the data available for the given realty id
 - [ ] maybe figure out how to take lng-int and how to search database for that
 - [ ] figure out how to save images localy with custom url
 - [ ] add multiple filters

@@ -56,7 +56,7 @@ func TestGetRealties(t *testing.T) {
 			}
 			// FIX: not doing anything useful
 			if len(test.realtyData) > 0 {
-				var gotBody map[string][]data.RealtyResponse
+				var gotBody map[string][]data.Realty
 				if err := json.NewDecoder(resp.Body).Decode(&gotBody); err != nil {
 					t.Fatal(err)
 				}

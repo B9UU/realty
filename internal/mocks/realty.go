@@ -1,7 +1,6 @@
 package mocks
 
 import (
-	"database/sql"
 	"strings"
 	"time"
 
@@ -14,7 +13,7 @@ type RealtyModelM struct {
 	MockCities     []string
 }
 
-func (m RealtyModelM) Insert(realty *data.RealtyInput) error {
+func (m RealtyModelM) Insert(realty *data.Realty) error {
 	realty.ID = 1
 	return nil
 }
@@ -22,6 +21,9 @@ func (m RealtyModelM) Insert(realty *data.RealtyInput) error {
 func (m RealtyModelM) GetAll(city string, filters data.Filters) ([]*data.Realties, data.Metadata, error) {
 	return m.MockRealtyData, data.Metadata{}, nil
 
+}
+func (m RealtyModelM) Get(id int64) (*data.Realty, error) {
+	return &data.Realty{}, nil
 }
 
 // mock for autocomplete method
@@ -95,7 +97,7 @@ var MockRealties = []data.Realties{
 		Updated:      time.Now(),
 	},
 }
-var MockRealtiesResponse = []data.RealtyResponse{
+var MockRealtiesResponse = []data.Realty{
 	{
 		ID:              1,
 		Name:            "Modern Apartment",
@@ -112,21 +114,19 @@ var MockRealtiesResponse = []data.RealtyResponse{
 		RawPropertyType: "Apartment",
 		PropertyType:    "Residential",
 		Updated:         time.Now(),
-		RentRange: []sql.NullInt32{
-			{Int32: 1500, Valid: true},
-			{Int32: 1800, Valid: true},
+		RentRange: []int32{
+			1500,
+			1800,
 		},
-		BedsRange: []sql.NullInt32{
-			{Int32: 2, Valid: true},
-			{Int32: 3, Valid: true},
+		BedsRange: []int32{
+			3, 2,
 		},
-		BathsRange: []sql.NullInt32{
-			{Int32: 1, Valid: true},
-			{Int32: 2, Valid: true},
+		BathsRange: []int32{
+			1, 2,
 		},
-		DimensionsRange: []sql.NullInt32{
-			{Int32: 850, Valid: true},
-			{Int32: 1050, Valid: true},
+		DimensionsRange: []int32{
+			850,
+			1050,
 		},
 	},
 	{
@@ -145,21 +145,21 @@ var MockRealtiesResponse = []data.RealtyResponse{
 		RawPropertyType: "Cottage",
 		PropertyType:    "Residential",
 		Updated:         time.Now(),
-		RentRange: []sql.NullInt32{
-			{Int32: 1200, Valid: true},
-			{Int32: 1500, Valid: true},
+		RentRange: []int32{
+			1200,
+			1500,
 		},
-		BedsRange: []sql.NullInt32{
-			{Int32: 3, Valid: true},
-			{Int32: 5, Valid: true},
+		BedsRange: []int32{
+			3,
+			5,
 		},
-		BathsRange: []sql.NullInt32{
-			{Int32: 2, Valid: true},
-			{Int32: 3, Valid: true},
+		BathsRange: []int32{
+			2,
+			3,
 		},
-		DimensionsRange: []sql.NullInt32{
-			{Int32: 1000, Valid: true},
-			{Int32: 1200, Valid: true},
+		DimensionsRange: []int32{
+			1000,
+			1200,
 		},
 	},
 }

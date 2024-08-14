@@ -12,47 +12,26 @@ type Envelope map[string]interface{}
 type Models struct {
 	Realty RealtyInterface
 }
-type RealtyResponse struct {
-	ID              int64           `json:"id,omitempty"`
-	Name            string          `json:"name,omitempty"`
-	Address1        string          `json:"address1,omitempty"`
-	Address2        string          `json:"address2,omitempty"`
-	PostalCode      string          `json:"postal_code,omitempty"`
-	Lat             float64         `json:"lat,omitempty"`
-	Lng             float64         `json:"lng,omitempty"`
-	Title           string          `json:"title,omitempty"`
-	FeaturedStatus  string          `json:"featured_status,omitempty"`
-	CityName        string          `json:"city_name,omitempty"`
-	PhotoCount      int             `json:"photo_count,omitempty"`
-	PhotoURL        string          `json:"photo_url,omitempty"`
-	RawPropertyType string          `json:"raw_property_type,omitempty"`
-	PropertyType    string          `json:"property_type,omitempty"`
-	Updated         time.Time       `json:"updated,omitempty"`
-	RentRange       []sql.NullInt32 `json:"rent_range,omitempty"`
-	BedsRange       []sql.NullInt32 `json:"beds_range,omitempty"`
-	BathsRange      []sql.NullInt32 `json:"baths_range,omitempty"`
-	DimensionsRange []sql.NullInt32 `json:"dimensions_range,omitempty"`
-}
-type RealtyInput struct {
-	ID              int64     `json:"id"`
-	Name            string    `json:"name"`
-	Address1        string    `json:"address1"`
-	Address2        string    `json:"address2"`
-	PostalCode      string    `json:"postal_code"`
-	Lat             float64   `json:"lat"`
-	Lng             float64   `json:"lng"`
-	Title           string    `json:"title"`
-	FeaturedStatus  string    `json:"featured_status"`
-	CityName        string    `json:"city_name"`
-	PhotoCount      int       `json:"photo_count"`
-	PhotoURL        string    `json:"photo_url"`
-	RawPropertyType string    `json:"raw_property_type"`
-	PropertyType    string    `json:"property_type"`
-	Updated         time.Time `json:"updated"`
-	RentRange       []int     `json:"rent_range"`
-	BedsRange       []int     `json:"beds_range"`
-	BathsRange      []int     `json:"baths_range"`
-	DimensionsRange []int     `json:"dimensions_range"`
+type Realty struct {
+	ID              int64     `json:"id,omitempty"`
+	Name            string    `json:"name,omitempty"`
+	Address1        string    `json:"address1,omitempty"`
+	Address2        string    `json:"address2,omitempty"`
+	PostalCode      string    `json:"postal_code,omitempty"`
+	Lat             float64   `json:"lat,omitempty"`
+	Lng             float64   `json:"lng,omitempty"`
+	Title           string    `json:"title,omitempty"`
+	FeaturedStatus  string    `json:"featured_status,omitempty"`
+	CityName        string    `json:"city_name,omitempty"`
+	PhotoCount      int       `json:"photo_count,omitempty"`
+	PhotoURL        string    `json:"photo_url,omitempty"`
+	RawPropertyType string    `json:"raw_property_type,omitempty"`
+	PropertyType    string    `json:"property_type,omitempty"`
+	Updated         time.Time `json:"updated,omitempty"`
+	RentRange       []int32   `json:"rent_range,omitempty"`
+	BedsRange       []int32   `json:"beds_range,omitempty"`
+	BathsRange      []int32   `json:"baths_range,omitempty"`
+	DimensionsRange []int32   `json:"dimensions_range,omitempty"`
 }
 
 type Realties struct {
