@@ -15,6 +15,21 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// to run background processes "sending activation emails"
+func (app *application) Background(fn func()) {
+	app.wg.Add(1)
+	go func() {
+		defer app.wg.Done()
+		defer func() {
+			// if fn panics logg the err
+			if err := recover(); err != nil {
+				app.logger.PrintError(fmt.Errorf("%s", err), nil)
+			}
+		}()
+		fn()
+	}()
+}
+
 // Reads from r into dest. only 1MB allowed
 func (app *application) ReadJSON(w http.ResponseWriter, r *http.Request, dest interface{}) error {
 	const max = 1_048_576

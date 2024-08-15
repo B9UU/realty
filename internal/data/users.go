@@ -108,7 +108,7 @@ func (u UserModel) Insert(user *User) error {
 	)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == pq.ErrorCode("23505") {
-			return ErrDuplicateId
+			return ErrDuplicateEmail
 		}
 		return err
 	}

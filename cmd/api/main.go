@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"flag"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/b9uu/realty/internal/data"
+	"github.com/b9uu/realty/internal/validator/mailer"
 	"github.com/b9uu/realty/jsonlog"
 	_ "github.com/lib/pq"
 )
@@ -21,12 +23,21 @@ type config struct {
 		maxIdleConns int
 		maxOpenConns int
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	config config
 	models data.Models
 	logger *jsonlog.Logger
+	wg     sync.WaitGroup
+	mailer mailer.Mailer
 }
 
 func main() {
@@ -42,6 +53,14 @@ func main() {
 		"db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&config.db.maxIdleConns,
 		"db-max-idle-conns", 25, "PostgreSQL max idle connections")
+	// mail config
+
+	flag.StringVar(&config.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&config.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&config.smtp.username, "smtp-username", "", "SMTP username")
+	flag.StringVar(&config.smtp.password, "smtp-password", "", "SMTP password")
+	flag.StringVar(&config.smtp.sender,
+		"smtp-sender", "Realty <noreply@realty.com>", "SMTP sender")
 
 	flag.Parse()
 	logg := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
@@ -56,6 +75,11 @@ func main() {
 		config: config,
 		models: data.NewModels(db),
 		logger: logg,
+		mailer: mailer.New(
+			config.smtp.host, config.smtp.sender,
+			config.smtp.username, config.smtp.password,
+			config.smtp.port,
+		),
 	}
 	if err := app.serve(); err != nil {
 		app.logger.PrintFatal(err, nil)

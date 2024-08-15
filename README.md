@@ -36,8 +36,12 @@
 - [x] create users table
 - [x] create registerUserActivated handler
 - [x] create tokens table
-- [ ] create login endpoint for activated users to generate tokens
-- [ ] generate and return new auth token on successful user registration
+- [x] create login endpoint for activated users to generate tokens
+<!--
+    since users are activated with registerUserActivated
+    they can generate tokens with /login endpoint
+-->
+- [-] generate and return new auth token on successful user registration
 - [ ] create registerUser endpoint with activated = false
     - [ ] create mailer
     - [ ] send the activation token in an email
