@@ -101,7 +101,7 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 			"userID":          user.ID,
 			"appName":         "Realty",
 			"method":          http.MethodPut,
-			"URI":             "users",
+			"URI":             "/users",
 		}
 		err = app.mailer.Send(user.Email, "welcome.html", data)
 		if err != nil {

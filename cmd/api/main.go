@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -55,12 +56,12 @@ func main() {
 		"db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	// mail config
 
-	flag.StringVar(&config.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
-	flag.IntVar(&config.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&config.smtp.host, "smtp-host", "live.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&config.smtp.port, "smtp-port", 587, "SMTP port")
 	flag.StringVar(&config.smtp.username, "smtp-username", "", "SMTP username")
 	flag.StringVar(&config.smtp.password, "smtp-password", "", "SMTP password")
 	flag.StringVar(&config.smtp.sender,
-		"smtp-sender", "Realty <noreply@realty.com>", "SMTP sender")
+		"smtp-sender", "Realty <noreply@ibrahimboussaa.com>", "SMTP sender")
 
 	flag.Parse()
 	logg := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
@@ -71,6 +72,7 @@ func main() {
 	defer db.Close()
 	logg.PrintInfo("database connection pool established", nil)
 	// initiate application
+	fmt.Printf("%+v", config.smtp)
 	app := &application{
 		config: config,
 		models: data.NewModels(db),
