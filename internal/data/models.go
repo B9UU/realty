@@ -11,7 +11,17 @@ type Envelope map[string]interface{}
 // cintains all models the application needs
 type Models struct {
 	Realty RealtyInterface
+	User   UserInterface
 }
+
+// initiate new models
+func NewModels(db *sql.DB) Models {
+	return Models{
+		Realty: RealtyModel{DB: db},
+		User:   UserModel{DB: db},
+	}
+}
+
 type Realty struct {
 	ID              int64     `json:"id,omitempty"`
 	Name            string    `json:"name,omitempty"`
@@ -43,11 +53,4 @@ type Realties struct {
 	CityName     string    `json:"city_name,omitempty"`
 	PropertyType string    `json:"property_type,omitempty"`
 	Updated      time.Time `json:"updated,omitempty"`
-}
-
-// initiate new models
-func NewModels(db *sql.DB) Models {
-	return Models{
-		Realty: RealtyModel{DB: db},
-	}
 }

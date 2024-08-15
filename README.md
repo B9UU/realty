@@ -25,10 +25,15 @@
 - [x] add filters
 - [x] returning metadata to getRealties handler
 - [-] metadata for autoComplete handler
-- [ ] create an endpoint to return all the data available for the given realty id
-- [ ] maybe figure out how to take lng-int and how to search database for that
-- [ ] figure out how to save images localy with custom url
-- [ ] add multiple filters
-- [ ] make getAll return limited data but uses filters
-- [ ] make get(id) to return all available data for a realty
+- [x] create an endpoint to return all the data available for the given realty id
+- [-] maybe figure out how to take lng-int and how to search database for that
+- [-] figure out how to save images localy with custom url
+- [x] add multiple filters
+- [x] make getAll return limited data but uses filters
+- [x] make get(id) to return all available data for a realty
 - [ ] validation
+
+- [x] create users table
+- [ ] create tokens table
+- [x] create registerUserActivated handler
+
