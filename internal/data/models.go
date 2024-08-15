@@ -12,6 +12,7 @@ type Envelope map[string]interface{}
 type Models struct {
 	Realty RealtyInterface
 	User   UserInterface
+	Token  TokenInterface
 }
 
 // initiate new models
@@ -19,6 +20,7 @@ func NewModels(db *sql.DB) Models {
 	return Models{
 		Realty: RealtyModel{DB: db},
 		User:   UserModel{DB: db},
+		Token:  TokenModel{DB: db},
 	}
 }
 

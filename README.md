@@ -34,6 +34,19 @@
 - [ ] validation
 
 - [x] create users table
-- [ ] create tokens table
 - [x] create registerUserActivated handler
+- [x] create tokens table
+- [ ] create login endpoint for activated users to generate tokens
+- [ ] generate and return new auth token on successful user registration
+- [ ] create registerUser endpoint with activated = false
+    - [ ] create mailer
+    - [ ] send the activation token in an email
+    - [ ] if account not activated and trying to loging re send
+            the activation email and respond with formative message
+- [ ] create activation endpoint
+- [ ] rate limiter
+    - [ ] limit unAuth users to send 10 requests per hour with 1 req/sec
+    - [ ] limit Auth users to send 100 requests per hour with 5 req/sec
+
+
 

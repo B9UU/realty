@@ -22,6 +22,7 @@ type UserModel struct {
 
 type UserInterface interface {
 	Insert(user *User) error
+	GetByEmail(string) (*User, error)
 }
 
 type User struct {
@@ -112,4 +113,26 @@ func (u UserModel) Insert(user *User) error {
 		return err
 	}
 	return nil
+}
+
+func (u UserModel) GetByEmail(email string) (*User, error) {
+	query := `
+		SELECT id, created_at, name, email, password_hash, activated, version
+		FROM users
+		WHERE email = $1
+	`
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	var user User
+	err := u.DB.QueryRowContext(ctx, query, email).Scan(
+		&user.ID, &user.CreatedAt, &user.Name, &user.Email,
+		&user.Password.hash, &user.Activated, &user.Version,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
 }

@@ -22,12 +22,13 @@ func (app *application) addRealty(w http.ResponseWriter, r *http.Request) {
 	err = app.models.Realty.Insert(&realty)
 	if err != nil {
 		// check if id is unique
-		if errors.Is(err, data.ErrDuplicateId) {
+		switch {
+		case errors.Is(err, data.ErrDuplicateId):
 			v.AddError("id", "a listing with this id already exists")
 			app.failedValidationRespone(w, r, v.Errors)
-			return
+		default:
+			app.serverErrorResponse(w, r, err)
 		}
-		app.serverErrorResponse(w, r, err)
 		return
 	}
 	header := make(http.Header)
@@ -65,11 +66,10 @@ func (app *application) Realties(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, data.ErrNotFound):
 			app.notFoundErrorResponse(w, r)
-			return
 		default:
 			app.serverErrorResponse(w, r, err)
-			return
 		}
+		return
 	}
 	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realties": realties, "metadata": metadata}, nil)
 	if err != nil {
@@ -90,11 +90,10 @@ func (app *application) Realty(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, data.ErrNotFound):
 			app.notFoundErrorResponse(w, r)
-			return
 		default:
 			app.serverErrorResponse(w, r, err)
-			return
 		}
+		return
 	}
 	err = app.writeJSON(w, http.StatusOK, data.Envelope{"realty": realty}, nil)
 	if err != nil {
@@ -115,11 +114,10 @@ func (app *application) autoComplete(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, data.ErrNotFound):
 			app.notFoundErrorResponse(w, r)
-			return
 		default:
 			app.serverErrorResponse(w, r, err)
-			return
 		}
+		return
 	}
 	err = app.writeJSON(w, http.StatusOK, data.Envelope{"result": results}, nil)
 	if err != nil {

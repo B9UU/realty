@@ -16,7 +16,7 @@ func (app *application) registerUserActivated(w http.ResponseWriter, r *http.Req
 	}
 	err := app.ReadJSON(w, r, &input)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		app.badRequestResponse(w, r, err)
 		return
 	}
 	user := &data.User{
@@ -36,12 +36,13 @@ func (app *application) registerUserActivated(w http.ResponseWriter, r *http.Req
 	}
 	err = app.models.User.Insert(user)
 	if err != nil {
-		if errors.Is(err, data.ErrDuplicateEmail) {
+		switch {
+		case errors.Is(err, data.ErrDuplicateEmail):
 			v.AddError("email", "a user with this email address already exists")
 			app.failedValidationRespone(w, r, v.Errors)
-			return
+		default:
+			app.serverErrorResponse(w, r, err)
 		}
-		app.serverErrorResponse(w, r, err)
 		return
 	}
 	err = app.writeJSON(w, http.StatusAccepted, data.Envelope{"user": user}, nil)
