@@ -42,9 +42,9 @@
     they can generate tokens with /login endpoint
 -->
 - [-] generate and return new auth token on successful user registration
-- [ ] create registerUser endpoint with activated = false
-    - [ ] create mailer
-    - [ ] send the activation token in an email
+- [x] create registerUser endpoint with activated = false
+    - [x] create mailer
+    - [x] send the activation token in an email
     - [ ] if account not activated and trying to loging re send
             the activation email and respond with formative message
 - [ ] create activation endpoint

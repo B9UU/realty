@@ -31,6 +31,7 @@ type TokenModel struct {
 type TokenInterface interface {
 	New(userId int64, ttl time.Duration, scope string) (*Token, error)
 	Insert(token *Token) error
+	DeleteAllForUser(scope string, userID int64) error
 }
 
 func generateNewToken(userId int64, ttl time.Duration, scope string) (*Token, error) {
@@ -82,6 +83,17 @@ func (t TokenModel) Insert(token *Token) error {
 	}
 	return nil
 
+}
+
+func (m TokenModel) DeleteAllForUser(scope string, userID int64) error {
+	query := `
+		DELETE FROM tokens
+		WHERE scope = $1 AND user_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	_, err := m.DB.ExecContext(ctx, query, scope, userID)
+	return err
 }
 
 // validate token

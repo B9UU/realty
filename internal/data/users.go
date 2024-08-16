@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
@@ -23,6 +24,8 @@ type UserModel struct {
 type UserInterface interface {
 	Insert(user *User) error
 	GetByEmail(string) (*User, error)
+	GetByToken(token, scope string) (*User, error)
+	Update(user *User) error
 }
 
 type User struct {
@@ -135,4 +138,55 @@ func (u UserModel) GetByEmail(email string) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (u UserModel) GetByToken(token, scope string) (*User, error) {
+	query := `
+		SELECT users.id, users.created_at, users.name, users.email,
+		users.password_hash, users.activated, users.version
+		FROM users
+		INNER JOIN tokens
+		ON users.id = tokens.user_id
+		WHERE tokens.scope = $1
+		AND tokens.hash = $2
+		AND tokens.expiry > $3;
+		`
+	tokenHash := sha256.Sum256([]byte(token))
+	user := User{}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	args := []interface{}{scope, tokenHash[:], time.Now()}
+	err := u.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID, &user.CreatedAt, &user.Name, &user.Email,
+		&user.Password.hash, &user.Activated, &user.Version)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u UserModel) Update(user *User) error {
+	query := `
+		UPDATE users
+		SET activated = $1, version = version + 1
+		WHERE id = $2 AND version = $3
+		RETURNING version
+		`
+	args := []interface{}{
+		user.Activated, user.ID, user.Version,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	err := u.DB.QueryRowContext(ctx, query, args...).Scan(&user.Version)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrEditConflict
+		}
+		return err
+	}
+
+	return nil
 }

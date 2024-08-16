@@ -114,3 +114,50 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (app *application) activateUser(w http.ResponseWriter, r *http.Request) {
+	var token struct {
+		Token string `json:"token"`
+	}
+	err := app.ReadJSON(w, r, &token)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	v := validator.New()
+	if data.ValidateTokenPlainText(v, token.Token); !v.Valid() {
+		app.failedValidationRespone(w, r, v.Errors)
+		return
+	}
+	user, err := app.models.User.GetByToken(token.Token, data.ScopeActivation)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrDuplicateEmail):
+			app.notFoundErrorResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	user.Activated = true
+	err = app.models.User.Update(user)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.notFoundErrorResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	err = app.models.Token.DeleteAllForUser(data.ScopeActivation, user.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, data.Envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}

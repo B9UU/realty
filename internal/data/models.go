@@ -2,7 +2,14 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 	"time"
+)
+
+var (
+	ErrDuplicateId  = errors.New("duplicate id")
+	ErrNotFound     = errors.New("record not found")
+	ErrEditConflict = errors.New("edit conflict")
 )
 
 // type to wrape the response

@@ -17,6 +17,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/realties", app.Realties)
 	router.HandlerFunc(http.MethodGet, "/auto-complete", app.autoComplete)
 
+	router.HandlerFunc(http.MethodPut, "/users/activated", app.activateUser)
+
 	router.HandlerFunc(http.MethodPost, "/usersActivated", app.registerUserActivated)
 	router.HandlerFunc(http.MethodPost, "/users", app.registerUser)
 	router.HandlerFunc(http.MethodPost, "/login", app.AuthToken)

@@ -56,7 +56,7 @@ func main() {
 		"db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	// mail config
 
-	flag.StringVar(&config.smtp.host, "smtp-host", "live.smtp.mailtrap.io", "SMTP host")
+	flag.StringVar(&config.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
 	flag.IntVar(&config.smtp.port, "smtp-port", 587, "SMTP port")
 	flag.StringVar(&config.smtp.username, "smtp-username", "", "SMTP username")
 	flag.StringVar(&config.smtp.password, "smtp-password", "", "SMTP password")

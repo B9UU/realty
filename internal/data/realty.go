@@ -11,11 +11,6 @@ import (
 	"github.com/lib/pq"
 )
 
-var (
-	ErrDuplicateId = errors.New("duplicate id")
-	ErrNotFound    = errors.New("record not found")
-)
-
 type RealtyModel struct {
 	DB *sql.DB
 }
