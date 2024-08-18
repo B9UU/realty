@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tomasen/realip"
+	"golang.org/x/time/rate"
 )
 
 // costume type for context key to avoide collisions
@@ -20,6 +23,54 @@ type statusRecorder struct {
 	status int
 }
 
+func (app *application) rateLimiter(next http.Handler) http.Handler {
+	type newClient struct {
+		Limiter  *rate.Limiter
+		lastSeen time.Time
+	}
+	var (
+		mu      sync.Mutex
+		clients = make(map[string]*newClient)
+	)
+
+	go func() {
+		for {
+			time.Sleep(time.Minute)
+			mu.Lock()
+			for ip, c := range clients {
+				if time.Since(c.lastSeen) > 3*time.Minute {
+					delete(clients, ip)
+				}
+			}
+			mu.Unlock()
+		}
+	}()
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if app.config.limiter.enabled {
+
+			ip := realip.FromRequest(r)
+
+			mu.Lock()
+
+			if _, found := clients[ip]; !found {
+				clients[ip] = &newClient{
+					Limiter: rate.NewLimiter(
+						rate.Limit(app.config.limiter.rps),
+						app.config.limiter.burst,
+					)}
+			}
+
+			clients[ip].lastSeen = time.Now()
+			if !clients[ip].Limiter.Allow() {
+				mu.Unlock()
+				app.rateLimiterExceededResponse(w, r)
+				return
+			}
+			mu.Unlock()
+		}
+		next.ServeHTTP(w, r)
+	})
+}
 func (rec *statusRecorder) WriteHeader(code int) {
 	rec.status = code
 	rec.ResponseWriter.WriteHeader(code)

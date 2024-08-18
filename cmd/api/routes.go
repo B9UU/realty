@@ -22,5 +22,5 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/usersActivated", app.registerUserActivated)
 	router.HandlerFunc(http.MethodPost, "/users", app.registerUser)
 	router.HandlerFunc(http.MethodPost, "/login", app.AuthToken)
-	return app.logRequest(router)
+	return app.logRequest(app.rateLimiter(router))
 }

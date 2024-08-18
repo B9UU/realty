@@ -24,6 +24,11 @@ type config struct {
 		maxIdleConns int
 		maxOpenConns int
 	}
+	limiter struct {
+		rps     float64
+		burst   int
+		enabled bool
+	}
 	smtp struct {
 		host     string
 		port     int
@@ -54,14 +59,20 @@ func main() {
 		"db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&config.db.maxIdleConns,
 		"db-max-idle-conns", 25, "PostgreSQL max idle connections")
-	// mail config
 
+	// mail config
 	flag.StringVar(&config.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
 	flag.IntVar(&config.smtp.port, "smtp-port", 587, "SMTP port")
 	flag.StringVar(&config.smtp.username, "smtp-username", "", "SMTP username")
 	flag.StringVar(&config.smtp.password, "smtp-password", "", "SMTP password")
 	flag.StringVar(&config.smtp.sender,
 		"smtp-sender", "Realty <noreply@ibrahimboussaa.com>", "SMTP sender")
+
+	// rate limiter config
+	flag.Float64Var(&config.limiter.rps,
+		"limiter-rps", 2, "Rate limiter maximum requests per second")
+	flag.IntVar(&config.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
+	flag.BoolVar(&config.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
 	flag.Parse()
 	logg := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
