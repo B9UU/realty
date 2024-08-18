@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"expvar"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/felixge/httpsnoop"
 	"github.com/google/uuid"
 	"github.com/tomasen/realip"
 	"golang.org/x/time/rate"
@@ -128,4 +131,21 @@ func (app *application) LogEndRequest(r *http.Request, start time.Time, status s
 		"duration": fmt.Sprintf("%d ms", time.Since(start).Milliseconds()),
 	}
 	app.logger.PrintInfo("Request done", lo)
+}
+
+// metrics
+func (app *application) metrics(next http.Handler) http.Handler {
+	totalRequestsReceived := expvar.NewInt("total_requests_received")
+	totalResponseSent := expvar.NewInt("total_response_sent")
+	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_micro_seconds")
+	totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		totalRequestsReceived.Add(1)
+
+		metrics := httpsnoop.CaptureMetrics(next, w, r)
+
+		totalResponseSent.Add(1)
+		totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
+		totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
+	})
 }
