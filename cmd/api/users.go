@@ -132,8 +132,9 @@ func (app *application) activateUser(w http.ResponseWriter, r *http.Request) {
 	user, err := app.models.User.GetByToken(token.Token, data.ScopeActivation)
 	if err != nil {
 		switch {
-		case errors.Is(err, data.ErrDuplicateEmail):
-			app.notFoundErrorResponse(w, r)
+		case errors.Is(err, data.ErrNotFound):
+			v.AddError("token", "invalid or expired activation token")
+			app.failedValidationRespone(w, r, v.Errors)
 		default:
 			app.serverErrorResponse(w, r, err)
 		}

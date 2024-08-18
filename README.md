@@ -47,7 +47,7 @@
     - [x] send the activation token in an email
     - [ ] if account not activated and trying to loging re send
             the activation email and respond with formative message
-- [ ] create activation endpoint
+- [x] create activation endpoint
 - [ ] rate limiter
     - [ ] limit unAuth users to send 10 requests per hour with 1 req/sec
     - [ ] limit Auth users to send 100 requests per hour with 5 req/sec

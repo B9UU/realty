@@ -47,6 +47,30 @@ func (app *application) AuthToken(w http.ResponseWriter, r *http.Request) {
 		app.invalidCredentialsResponse(w, r)
 		return
 	}
+	if !user.Activated {
+		v.AddError("error", "should activate account please check your email")
+		app.failedValidationRespone(w, r, v.Errors)
+
+		token, err := app.models.Token.New(user.ID, time.Hour*3*24, data.ScopeActivation)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		app.Background(func() {
+			data := map[string]any{
+				"activationToken": token.Plaintext,
+				"userID":          user.ID,
+				"appName":         "Realty",
+				"method":          http.MethodPut,
+				"URI":             "/users",
+			}
+			err = app.mailer.Send(user.Email, "welcome.html", data)
+			if err != nil {
+				app.logger.PrintError(err, nil)
+			}
+		})
+		return
+	}
 	token, err := app.models.Token.New(user.ID, time.Hour*24, data.ScopeAuthentication)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
