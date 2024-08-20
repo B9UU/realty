@@ -48,9 +48,12 @@
     - [ ] if account not activated and trying to loging re send
             the activation email and respond with formative message
 - [x] create activation endpoint
-- [ ] rate limiter
-    - [ ] limit unAuth users to send 10 requests per hour with 1 req/sec
-    - [ ] limit Auth users to send 100 requests per hour with 5 req/sec
+- [x] rate limiter
+    - [-] limit unAuth users to send 10 requests per hour with 1 req/sec
+    - [-] limit Auth users to send 100 requests per hour with 5 req/sec
+- [ ] add new listings (create a scraper)
+- [ ] docs
+- [ ] maybe a frontend
 
 
 

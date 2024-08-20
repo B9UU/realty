@@ -2,21 +2,22 @@ package main
 
 import (
 	"context"
+	"errors"
 	"expvar"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/b9uu/realty/internal/data"
+	"github.com/b9uu/realty/internal/validator"
 	"github.com/felixge/httpsnoop"
 	"github.com/google/uuid"
 	"github.com/tomasen/realip"
 	"golang.org/x/time/rate"
 )
-
-// costume type for context key to avoide collisions
-type contextKey string
 
 const reqIdKey = contextKey("requestIdKey")
 
@@ -37,10 +38,46 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", "Authorization")
+		token := r.Header.Get("Authorization")
+		if token == "" {
+			r = app.contextSetUser(r, data.AnonymousUser)
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		splited := strings.Split(token, " ")
+		if len(splited) != 2 || splited[0] != "Bearer" {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+		token = splited[1]
+		v := validator.New()
+		if data.ValidateTokenPlainText(v, token); !v.Valid() {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+		user, err := app.models.User.GetByToken(data.ScopeAuthentication, token)
+		if err != nil {
+			if errors.Is(err, data.ErrNotFound) {
+				app.invalidAuthenticationTokenResponse(w, r)
+				return
+			}
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		r = app.contextSetUser(r, user)
+		next.ServeHTTP(w, r)
+	})
+}
 func (app *application) rateLimiter(next http.Handler) http.Handler {
 	type newClient struct {
 		Limiter  *rate.Limiter
 		lastSeen time.Time
+		ReqCount uint
 	}
 	var (
 		mu      sync.Mutex
@@ -69,7 +106,7 @@ func (app *application) rateLimiter(next http.Handler) http.Handler {
 			if _, found := clients[ip]; !found {
 				clients[ip] = &newClient{
 					Limiter: rate.NewLimiter(
-						rate.Limit(app.config.limiter.rps),
+						rate.Limit(app.config.limiter.rps/60),
 						app.config.limiter.burst,
 					)}
 			}
