@@ -3,6 +3,7 @@ module github.com/b9uu/realty
 go 1.22.0
 
 require (
+	github.com/2captcha/2captcha-go v1.1.8 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-mail/mail v2.3.1+incompatible // indirect
 	github.com/google/uuid v1.6.0 // indirect

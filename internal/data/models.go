@@ -47,10 +47,10 @@ type Realty struct {
 	RawPropertyType string    `json:"raw_property_type,omitempty"`
 	PropertyType    string    `json:"property_type,omitempty"`
 	Updated         time.Time `json:"updated,omitempty"`
-	RentRange       []int32   `json:"rent_range,omitempty"`
-	BedsRange       []int32   `json:"beds_range,omitempty"`
-	BathsRange      []int32   `json:"baths_range,omitempty"`
-	DimensionsRange []int32   `json:"dimensions_range,omitempty"`
+	RentRange       []float32 `json:"rent_range,omitempty"`
+	BedsRange       []float32 `json:"beds_range,omitempty"`
+	BathsRange      []float32 `json:"baths_range,omitempty"`
+	DimensionsRange []float32 `json:"dimensions_range,omitempty"`
 }
 
 type Realties struct {

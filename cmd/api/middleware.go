@@ -73,6 +73,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
 func (app *application) rateLimiter(next http.Handler) http.Handler {
 	type newClient struct {
 		Limiter  *rate.Limiter

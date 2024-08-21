@@ -1,3 +1,5 @@
+github.com/2captcha/2captcha-go v1.1.8 h1:c9hnmNAbJGewT+9mvpEZUaliXE+ORO2yEv0Uzn9rPiA=
+github.com/2captcha/2captcha-go v1.1.8/go.mod h1:hYOq+KVOq/0zAG6OTYW7Y313qDkHv58CcaOyjdBQSco=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/go-mail/mail v2.3.1+incompatible h1:UzNOn0k5lpfVtO31cK3hn6I4VEVGhe3lX8AJBAxXExM=

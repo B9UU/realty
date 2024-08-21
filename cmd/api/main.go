@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/b9uu/realty/internal/data"
+	"github.com/b9uu/realty/internal/scraper"
 	"github.com/b9uu/realty/internal/validator/mailer"
 	"github.com/b9uu/realty/jsonlog"
 	_ "github.com/lib/pq"
@@ -95,6 +96,10 @@ func main() {
 			config.smtp.username, config.smtp.password,
 			config.smtp.port,
 		),
+	}
+	err = scraper.Scrape(app.models.Realty)
+	if err != nil {
+		panic(err)
 	}
 
 	var version = "1.0.0"
